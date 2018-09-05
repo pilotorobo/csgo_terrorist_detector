@@ -46,8 +46,8 @@ def is_esc_pressed():
 
 if __name__ == "__main__":
     
-    print("Initting getting training data...")
-    time.sleep(5)
+    print("Starting...")
+    time.sleep(5) #Sleep 5 seconds to get to the right window
 
     print("Getting training data... Press ESC to exit.")
 
