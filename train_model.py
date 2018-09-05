@@ -1,5 +1,7 @@
 import sys, os, math
 
+import argparse
+
 import numpy as np
 import tensorflow as tf
 
@@ -67,7 +69,7 @@ def create_optimizer(logits, labels, learning_rate):
 
 class CSGOModel:
 
-    def __init__(self, learning_rate=0.001):
+    def __init__(self, learning_rate=0.001, force_new_model=False):
         tf.reset_default_graph()
         
         inputs, labels = create_inputs()
@@ -78,7 +80,7 @@ class CSGOModel:
         
         last_cp_file = tf.train.latest_checkpoint("checkpoints")
 
-        if last_cp_file:
+        if not force_new_model and last_cp_file:
             print("Restoring last checkpoint...")
             saver = tf.train.Saver()
             saver.restore(session, last_cp_file)
@@ -139,13 +141,13 @@ def main(args):
     notpressed_ratio = len([f for f in valid_files if 'not' in f]) / len(valid_files)
     print("Ratio of not pressed data: {}".format(notpressed_ratio))
 
-    N_EPOCHS = 10
+    N_EPOCHS =args.epochs
 
-    BATCH_SIZE = 64
+    BATCH_SIZE = args.batch_size
 
     n_batches = math.ceil(len(train_files) / BATCH_SIZE)
 
-    model = CSGOModel()
+    model = CSGOModel(learning_rate=args.learning_rate, force_new_model=args.force_new_model)
 
     for e in range(N_EPOCHS):
         
@@ -180,4 +182,12 @@ def main(args):
     print("Model saved.")
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    parser = argparse.ArgumentParser(description='Train prediction model')
+    parser.add_argument('--learning-rate', default=0.001, type=float)
+    parser.add_argument('--epochs', default=1, type=int)
+    parser.add_argument('--batch-size', default=64, type=int)
+    parser.add_argument('--force-new-model', default=False, type=bool)
+
+    args = parser.parse_args()
+
+    main(args)
